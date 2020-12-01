@@ -1,7 +1,8 @@
 use clap::{crate_description, App, Arg};
 use day09::{part1, part2};
 use std::fs::File;
-use std::io::BufReader;
+use std::io::{BufRead, BufReader};
+use std::num::ParseIntError;
 use std::process::exit;
 
 fn main() {
@@ -15,19 +16,40 @@ fn main() {
         .get_matches();
 
     println!(crate_description!());
-    let _input = read_input(args.value_of("INPUT").unwrap());
-    println!("Part 1: {}", part1());
-    println!("Part 2: {}", part2());
-}
 
-fn read_input(filename: &str) -> i32 {
-    let _file = match File::open(filename) {
-        Ok(file) => BufReader::new(file),
+    let input = match read_input(args.value_of("INPUT").unwrap()) {
+        Ok(data) => data,
         Err(err) => {
-            println!("Failed to open file '{}': {}", filename, err.to_string());
+            println!("Failed to read input: {}", err);
             exit(2);
         }
     };
 
-    unimplemented!()
+    match part1(&input) {
+        Some(result) => println!("Part 1: {}", result),
+        None => println!("Part 1: not found"),
+    };
+
+    match part2(&input) {
+        Some(result) => println!("Part 2: {}", result),
+        None => println!("Part 2: not found"),
+    };
+}
+
+fn read_input(filename: &str) -> Result<Vec<i32>, String> {
+    let input_file = File::open(filename).map_err(|err| err.to_string())?;
+
+    BufReader::new(input_file)
+        .lines()
+        .zip(1..)
+        .map(|(line, line_num)| {
+            line.map_err(|err| (line_num, err.to_string()))
+                .and_then(|value| {
+                    value.parse().map_err(|err: ParseIntError| {
+                        (line_num, err.to_string())
+                    })
+                })
+        })
+        .collect::<Result<_, _>>()
+        .map_err(|(line_num, err)| format!("Line {}: {}", line_num, err))
 }
