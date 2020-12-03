@@ -1,5 +1,5 @@
 use clap::{crate_description, App, Arg};
-use day12::{part1, part2};
+use day12::*;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::num::ParseIntError;
