@@ -25,18 +25,22 @@ fn main() {
         }
     };
 
-    match part1(&input) {
-        Some(result) => println!("Part 1: {}", result),
-        None => println!("Part 1: not found"),
-    };
-
-    match part2(&input) {
-        Some(result) => println!("Part 2: {}", result),
-        None => println!("Part 2: not found"),
+    let preamble_len = 25;
+    match part1(&input, preamble_len) {
+        Some(result1) => {
+            println!("Part 1: {}", result1);
+            match part2(&input, result1) {
+                Some(result2) => println!("Part 2: {}", result2),
+                None => println!("Part 2: not found"),
+            };
+        }
+        None => {
+            println!("Part 1: not found\nPart 2: not found");
+        }
     };
 }
 
-fn read_input(filename: &str) -> Result<Vec<i32>, String> {
+fn read_input(filename: &str) -> Result<Vec<i64>, String> {
     let input_file = File::open(filename).map_err(|err| err.to_string())?;
 
     BufReader::new(input_file)
