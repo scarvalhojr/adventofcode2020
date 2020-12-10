@@ -34,8 +34,9 @@ pub fn part2(adapters: &[i32]) -> Option<u64> {
     let mut path_count = HashMap::new();
     path_count.insert(start, 1);
 
-    for (index, adapter) in sorted_adapters.iter().enumerate() {
-        let count = *path_count.get(&adapter)?;
+    let len = 1 + adapters.len();
+    for (index, adapter) in sorted_adapters.iter().enumerate().take(len) {
+        let count = path_count.remove(&adapter)?;
         for next_adapter in sorted_adapters[index + 1..]
             .iter()
             .take_while(|&next| next - adapter <= 3)
