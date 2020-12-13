@@ -1,8 +1,6 @@
 use clap::{crate_description, App, Arg};
 use day13::*;
-use std::fs::File;
-use std::io::{BufRead, BufReader};
-use std::num::ParseIntError;
+use std::fs::read_to_string;
 use std::process::exit;
 
 fn main() {
@@ -17,39 +15,44 @@ fn main() {
 
     println!(crate_description!());
 
-    let input = match read_input(args.value_of("INPUT").unwrap()) {
-        Ok(data) => data,
+    let (time, busses) = match read_input(args.value_of("INPUT").unwrap()) {
+        Ok((time, busses)) => (time, busses),
         Err(err) => {
             println!("Failed to read input: {}", err);
             exit(2);
         }
     };
 
-    match part1(&input) {
+    match part1(time, &busses) {
         Some(result) => println!("Part 1: {}", result),
         None => println!("Part 1: not found"),
     };
-
-    match part2(&input) {
-        Some(result) => println!("Part 2: {}", result),
-        None => println!("Part 2: not found"),
-    };
+    println!("Part 2: {}", part2(&busses));
 }
 
-fn read_input(filename: &str) -> Result<Vec<i32>, String> {
-    let input_file = File::open(filename).map_err(|err| err.to_string())?;
+fn read_input(filename: &str) -> Result<(Timestamp, Vec<Option<Bus>>), String> {
+    let input = read_to_string(filename).map_err(|err| err.to_string())?;
+    let mut lines = input.lines();
 
-    BufReader::new(input_file)
-        .lines()
-        .zip(1..)
-        .map(|(line, line_num)| {
-            line.map_err(|err| (line_num, err.to_string()))
-                .and_then(|value| {
-                    value.parse().map_err(|err: ParseIntError| {
-                        (line_num, err.to_string())
-                    })
-                })
+    let timestamp = lines
+        .next()
+        .ok_or_else(|| String::from("Missing timestamp"))?
+        .parse()
+        .map_err(|err| format!("Invalid timestamp: {}", err))?;
+    let busses = lines
+        .next()
+        .ok_or_else(|| String::from("Missing bus list"))?
+        .split(',')
+        .map(|bus| {
+            if bus == "x" {
+                Ok(None)
+            } else {
+                bus.parse()
+                    .map(Some)
+                    .map_err(|err| format!("Invalid bus number: {}", err))
+            }
         })
-        .collect::<Result<_, _>>()
-        .map_err(|(line_num, err)| format!("Line {}: {}", line_num, err))
+        .collect::<Result<_, _>>()?;
+
+    Ok((timestamp, busses))
 }
