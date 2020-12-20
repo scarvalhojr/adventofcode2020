@@ -1,11 +1,7 @@
 use clap::{crate_description, App, Arg};
-use part1::*;
-use part2::*;
+use day17::*;
 use std::fs::read_to_string;
 use std::process::exit;
-
-pub mod part1;
-pub mod part2;
 
 fn main() {
     let args = App::new(crate_description!())
@@ -19,7 +15,7 @@ fn main() {
 
     println!(crate_description!());
 
-    let (grid3d, grid4d) = match read_input(args.value_of("INPUT").unwrap()) {
+    let input = match read_to_string(args.value_of("INPUT").unwrap()) {
         Ok(data) => data,
         Err(err) => {
             println!("Failed to read input: {}", err);
@@ -27,13 +23,12 @@ fn main() {
         }
     };
 
-    println!("Part 1: {}", part1(&grid3d));
-    println!("Part 2: {}", part2(&grid4d));
-}
-
-fn read_input(filename: &str) -> Result<(Grid3D, Grid4D), String> {
-    let input = read_to_string(filename).map_err(|err| err.to_string())?;
-    let grid3d = input.parse()?;
-    let grid4d = input.parse()?;
-    Ok((grid3d, grid4d))
+    match part1(&input) {
+        Ok(result) => println!("Part 1: {}", result),
+        Err(err) => println!("Part 1: {}", err),
+    }
+    match part2(&input) {
+        Ok(result) => println!("Part 2: {}", result),
+        Err(err) => println!("Part 2: {}", err),
+    }
 }
